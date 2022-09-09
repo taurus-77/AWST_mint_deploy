@@ -113,14 +113,12 @@ contract AWST_NSM is ERC1155, Ownable, Pausable {
 
     function mintBatch(
         address to,
-        uint256 tokenCount,
         string[] memory uris,
         uint256[] memory values,
         bytes memory data
     ) public onlyMinter {
-        require(uris.length == tokenCount, "ERC1155: uris length mismatch with token count");
-        uint256[] memory ids = new uint256[](tokenCount);
-        for (uint256 i = 0; i < tokenCount; i++) {
+        uint256[] memory ids = new uint256[](uris.length);
+        for (uint256 i = 0; i < uris.length; i++) {
             ids[i] = _getNextTokenID();
             _incrementTokenId();
         }

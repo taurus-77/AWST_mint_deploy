@@ -67,9 +67,9 @@ const setUpWeb3 = async function () {
     // }
 };
 
-const mintBatch = async function (tokenIds, tokenCount, tokenURIs, values) {
+const mintBatch = async function (tokenIds, tokenURIs, values) {
     await nftContract.methods
-        .mintBatch(OWNER_ADDRESS, tokenCount, tokenURIs, values, "0x0")
+        .mintBatch(OWNER_ADDRESS, tokenURIs, values, "0x0")
         .send({ from: OWNER_ADDRESS, chainId: 80001 })
         .then(async (result) => {
             console.log("https://mumbai.polygonscan.com/tx/" + result.transactionHash);
@@ -104,7 +104,7 @@ const main = async () => {
         let values = Array(tokenCount).fill(1);
 
         // call batch mint function
-        await mintBatch(tokenIds, tokenCount, tokenURIs, values);
+        await mintBatch(tokenIds, tokenURIs, values);
     }
 
     await fs.appendFileSync(fileName, JSON.stringify(batchTxs, null, 2), "utf-8", (err) => {
