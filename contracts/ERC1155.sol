@@ -14,11 +14,8 @@ contract AWST_NSM is ERC1155, Ownable, Pausable {
     
     mapping(uint256 => string) private _tokenURIs;
     mapping(address => bool) public isAllowedMinter;
-    mapping(uint256 => bool) public isRevealed;
     mapping(uint256 => bool) public isDisabled;
 
-    bool public isCollectionRevealed;
-    string public defaultURI;
     uint256 public currentTokenID;
 
     modifier onlyMinter() {
@@ -33,15 +30,11 @@ contract AWST_NSM is ERC1155, Ownable, Pausable {
         string memory _name,
         string memory _symbol,
         string memory _baseURI,
-        string memory _defaultURI,
-        bool _isCollectionRevealed,
         bool _isPaused
     ) ERC1155(_baseURI) {
         name = _name;
         symbol = _symbol;
         baseURI = _baseURI;
-        defaultURI = _defaultURI;
-        isCollectionRevealed = _isCollectionRevealed;
         isAllowedMinter[_msgSender()] = true;
 
         if(_isPaused) {
@@ -49,47 +42,11 @@ contract AWST_NSM is ERC1155, Ownable, Pausable {
         }
     }
 
-
     /**
      * @dev used for setting the base uri of the collection
      */
     function setBaseURI(string memory _baseURI) public onlyOwner {
         baseURI = _baseURI;
-    }
-
-    /**
-     * @dev used for setting the default uri of the collection i.e. when the token is unrevealed
-     */
-    function setDefaultURI(string memory _defaultURI) public onlyOwner {
-        defaultURI = _defaultURI;
-    }
-
-    /**
-     * @dev set the whole collection to revealed status
-     */
-    function revealCollection() public onlyOwner {
-        isCollectionRevealed = true;
-    }
-
-    /**
-     * @dev set the whole collection to unrevealed status
-     */
-    function unrevealCollection() public onlyOwner {
-        isCollectionRevealed = false;
-    }
-
-    /**
-     * @dev set the status of a token to revealed
-     */
-    function revealSingle(uint256 _tokenID) public onlyOwner {
-        isRevealed[_tokenID] = true;
-    }
-
-    /**
-     * @dev set the status of a token to unrevealed
-     */
-    function unrevealSingle(uint256 _tokenID) public onlyOwner {
-        isRevealed[_tokenID] = false;
     }
 
     /**
@@ -122,11 +79,7 @@ contract AWST_NSM is ERC1155, Ownable, Pausable {
 
     function uri(uint256 _id) public view override returns (string memory) {
         if (bytes(_tokenURIs[_id]).length > 0) {
-            if (isCollectionRevealed || isRevealed[_id]) {
-                return string(abi.encodePacked(baseURI, _tokenURIs[_id]));
-            } else {
-                return defaultURI;
-            }
+            return string(abi.encodePacked(baseURI, _tokenURIs[_id]));
         } else {
             return "";
         }
@@ -149,13 +102,11 @@ contract AWST_NSM is ERC1155, Ownable, Pausable {
         address account,
         uint256 amount,
         string memory _uri,
-        bool _isRevealed,
         bytes memory data
     ) public onlyMinter returns (uint256) {
         uint256 tokenId = _getNextTokenID();
         _mint(account, tokenId, amount, data);
         setURI(tokenId, _uri);
-        isRevealed[tokenId] = _isRevealed;
         _incrementTokenId();
         return tokenId;
     }
@@ -165,15 +116,12 @@ contract AWST_NSM is ERC1155, Ownable, Pausable {
         uint256 tokenCount,
         string[] memory uris,
         uint256[] memory values,
-        bool[] memory _isRevealed,
         bytes memory data
     ) public onlyMinter {
         require(uris.length == tokenCount, "ERC1155: uris length mismatch with token count");
-        require(_isRevealed.length == tokenCount, "ERC1155: isRevealed length mismatch with token count");
         uint256[] memory ids = new uint256[](tokenCount);
         for (uint256 i = 0; i < tokenCount; i++) {
             ids[i] = _getNextTokenID();
-            isRevealed[ids[i]] = _isRevealed[i];
             _incrementTokenId();
         }
         _mintBatch(to, ids, values, data);
@@ -198,14 +146,11 @@ contract AWST_NSM is ERC1155, Ownable, Pausable {
         uint256[] memory amounts,
         bytes memory data
     ) public override whenNotPaused {
-        require(
-            ids.length == amounts.length,
-            "ERC1155: Batch transfer: ids and amounts length mismatch"
-        );
+        
         for (uint256 i = 0; i < ids.length; i++) {
             require(
                 !isDisabled[ids[i]],
-                "ERC1155: Transfer disabled for this NFT"
+                "ERC1155: Transfer disabled for one of the NFTs"
             );
         }
         super.safeBatchTransferFrom(from, to, ids, amounts, data);

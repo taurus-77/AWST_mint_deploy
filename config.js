@@ -15,7 +15,7 @@ module.exports = {
         rpc_provider: "https://rpc-mumbai.maticvigil.com/",
         mnemonic: secret.mnemonic,
         infura_key: secret.infuraKey,
-        nft_contract_address: "0x0B7964D7336681Eee63AB97c832636D5b4f0508F",
+        nft_contract_address: "0xC29454B47F010b97882f876e311871b926b19F6e",
         owner_address: "0x1C4A0724DC884076B9196FFf7606623409613Adf",
     },
     maticmainnet: {
