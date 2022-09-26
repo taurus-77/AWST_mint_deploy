@@ -21,8 +21,7 @@ module.exports = {
     maticmainnet: {
         network: "mainnet",
         chainId: 137,
-        rpc_provider:
-            "https://speedy-nodes-nyc.moralis.io/e3771a4194ca1a8d20c96277/polygon/mainnet",
+        rpc_provider: "https://rpc-mainnet.maticvigil.com/",
         mnemonic: secret.mnemonic,
         infura_key: secret.infuraKey,
         nft_contract_address: "",
